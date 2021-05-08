@@ -1,5 +1,7 @@
 package cn.taoass.web.download;
 
+import cn.taoass.web.utils.DownLoadUtils;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -28,7 +30,15 @@ public class DownloadServlet extends HttpServlet {
         String mimeType = servletContext.getMimeType("filename");//获取文件的mime类型
         response.setHeader("content-type",mimeType);
         //3.2设置响应头的打开方式 content-disposition
-        response.setHeader("content-disposition","attachment;filename"+filename);
+
+        //PS：由于不同浏览器的编码格式不同，我们需要设置filename之后再使用
+        //解决中文文件名的问题
+        //1.获取请求头user-agent
+        String agent = request.getHeader("user-agent");
+        //2.使用工具类方法编码文件名即可
+        filename = DownLoadUtils.getFileName(agent, filename);
+
+        response.setHeader("content-disposition","attachment;filename="+filename);
         //4.将输入流写出到输出流中
         ServletOutputStream sos = response.getOutputStream();
         byte[] buff = new byte[1024 * 8];
